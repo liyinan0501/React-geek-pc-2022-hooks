@@ -1,16 +1,13 @@
-import axios from 'axios'
-import { setToken } from '@/utils'
+import { setToken } from '@/utils/token'
+import request from '@/utils/request'
 
 export const login = (mobile, code) => {
   return async (dispatch) => {
-    const res = await axios.post(
-      'http://geek.itheima.net/v1_0/authorizations',
-      {
-        mobile,
-        code,
-      }
-    )
-    const { token } = res.data.data
+    const res = await request.post('/authorizations', {
+      mobile,
+      code,
+    })
+    const { token } = res.data
     dispatch({
       type: 'login/token',
       payload: token,
