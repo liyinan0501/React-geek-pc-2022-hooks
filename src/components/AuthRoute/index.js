@@ -1,16 +1,16 @@
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { hasToken } from 'utils/token'
 import React from 'react'
 
 const AuthRoute = ({ children }) => {
-  const location = useLocation()
   return hasToken() ? (
     <>{children}</>
   ) : (
     <Navigate
-      replace={true}
+      replace
+      // to="/login"
+      // state={{ from: `${location.pathname}${location.search}` }}
       to="/login"
-      state={{ from: `${location.pathname}` }}
     />
   )
 }

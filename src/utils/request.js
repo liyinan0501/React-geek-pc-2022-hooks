@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { message } from 'antd'
 import { removeToken, hasToken, getToken } from './token'
+import { history } from 'utils/history'
 
 export const baseURL = 'http://geek.itheima.net/v1_0'
 const request = axios.create({
@@ -46,7 +47,7 @@ request.interceptors.response.use(
       message.warn('Login expired', 1)
       // 3. 跳转登录页
       // 难点：在非组件中，是无法使用Redirect，也无法访问到history对象。
-      // history.push('/login')
+      history.push('/login')
     }
     return Promise.reject(error)
   }

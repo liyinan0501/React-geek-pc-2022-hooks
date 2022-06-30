@@ -1,9 +1,4 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 
 import Login from './pages/Login'
 import Layout from './pages/Layout'
@@ -15,9 +10,12 @@ import Home from 'pages/Home'
 import Article from 'pages/Article'
 import Publish from 'pages/Publish/Publish'
 
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'
+import { history } from 'utils/history'
+
 function App() {
   return (
-    <Router>
+    <HistoryRouter history={history}>
       <div className="App">
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />}></Route>
@@ -37,7 +35,7 @@ function App() {
           <Route path="*" element={<NotFound />}></Route>
         </Routes>
       </div>
-    </Router>
+    </HistoryRouter>
   )
 }
 
