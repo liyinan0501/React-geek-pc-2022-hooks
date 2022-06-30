@@ -4,7 +4,6 @@ import React from 'react'
 
 const AuthRoute = ({ children }) => {
   const location = useLocation()
-  console.log(location.pathname)
   return hasToken() ? (
     <>{children}</>
   ) : (

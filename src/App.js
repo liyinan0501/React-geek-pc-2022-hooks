@@ -11,6 +11,10 @@ import NotFound from './pages/NotFound'
 
 import AuthRoute from 'components/AuthRoute'
 
+import Home from 'pages/Home'
+import Article from 'pages/Article'
+import Publish from 'pages/Publish/Publish'
+
 function App() {
   return (
     <Router>
@@ -24,8 +28,11 @@ function App() {
                 <Layout />
               </AuthRoute>
             }
-          ></Route>
-          {/* <Route path="/home" element={<Layout />}></Route> */}
+          >
+            <Route exact path="/home" element={<Home />}></Route>
+            <Route path="/home/article" element={<Article />}></Route>
+            <Route path="/home/publish" element={<Publish />}></Route>
+          </Route>
           <Route path="/login" element={<Login />}></Route>
           <Route path="*" element={<NotFound />}></Route>
         </Routes>
