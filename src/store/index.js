@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import reducer from './reducers/index'
-import { getToken } from '@/utils'
+import { getToken } from 'utils/token'
 
 const initialState = {
   login: getToken(),

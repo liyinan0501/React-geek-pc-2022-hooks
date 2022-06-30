@@ -1,5 +1,5 @@
-import { setToken } from '@/utils/token'
-import request from '@/utils/request'
+import { setToken } from 'utils/token'
+import request from 'utils/request'
 
 export const login = (mobile, code) => {
   return async (dispatch) => {
