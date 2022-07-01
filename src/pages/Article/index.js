@@ -3,7 +3,6 @@ import {
   Breadcrumb,
   Form,
   Radio,
-  Select,
   DatePicker,
   Button,
   Space,
@@ -22,23 +21,20 @@ import {
 import { ArticleStatus } from 'api/constant'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { getChannels, getArticles, delArticle } from 'store/actions'
+import { getArticles, delArticle } from 'store/actions'
+import Channel from 'components/Channel/index'
 import img404 from 'assets/error.png'
 import { useRef } from 'react'
 
-const { Option } = Select
 const { RangePicker } = DatePicker
 const { confirm } = Modal
 
 const Article = () => {
   const dispatch = useDispatch()
-
   useEffect(() => {
-    dispatch(getChannels())
     dispatch(getArticles({}))
   }, [dispatch])
 
-  const channels = useSelector((item) => item.channel)
   const { current, pageSize, total, list } = useSelector((item) => item.article)
 
   const columns = [
@@ -194,15 +190,11 @@ const Article = () => {
           </Form.Item>
 
           <Form.Item label="Channel" name="channel_id" labelCol={{ span: 2 }}>
-            <Select placeholder="Select a channel" style={{ width: 120 }}>
-              {channels.map((item) => (
-                <Option key={item.id}>{item.name}</Option>
-              ))}
-            </Select>
+            <Channel width={266} />
           </Form.Item>
 
           <Form.Item label="Date" name="date" labelCol={{ span: 2 }}>
-            <RangePicker />
+            <RangePicker style={{ width: 266 }} />
           </Form.Item>
 
           <Form.Item

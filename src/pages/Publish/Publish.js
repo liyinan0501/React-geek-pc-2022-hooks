@@ -1,13 +1,58 @@
 import styles from './index.module.scss'
-import { Card, Breadcrumb, Form, Button, Space, Input, message } from 'antd'
+import {
+  Card,
+  Breadcrumb,
+  Form,
+  Button,
+  Space,
+  Input,
+  Radio,
+  Upload,
+  Modal,
+} from 'antd'
 import { Link } from 'react-router-dom'
-import { HomeOutlined, DiffOutlined } from '@ant-design/icons'
+import { HomeOutlined, DiffOutlined, PlusOutlined } from '@ant-design/icons'
 import Channel from 'components/Channel/index'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
+import { useState } from 'react'
+import { baseURL } from 'utils/request'
 
 const Publish = () => {
   const onFinish = (values) => {
     console.log(values)
   }
+
+  const [uploadAmount, setUploadAmount] = useState(1)
+  const changeType = (e) => {
+    const count = e.target.value
+    setUploadAmount(count)
+    setFileList([])
+  }
+
+  const [fileList, setFileList] = useState([
+    {
+      url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+    },
+  ])
+  // uploaded image will be saved in fileList
+  const uploadImage = ({ fileList }) => {
+    setFileList(fileList)
+  }
+
+  const [showPreview, setShowPreview] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState('')
+  const handlePreview = (file) => {
+    const url = file.url || file.response.data.url
+    setShowPreview(true)
+    setPreviewUrl(url)
+  }
+
+  const handleCancel = () => {
+    setShowPreview(false)
+    setPreviewUrl('')
+  }
+
   return (
     <div className={styles.root}>
       <Card
@@ -31,7 +76,8 @@ const Publish = () => {
           size="large"
           onFinish={onFinish}
           validateTrigger={['onBlur', 'onChange']}
-          // initialValues={{ channel_id: 4 }}
+          //Quill 必须要有初始值 content: ''
+          initialValues={{ content: '', type: uploadAmount }}
         >
           <Form.Item
             label="Title"
@@ -48,11 +94,62 @@ const Publish = () => {
               placeholder="Input article's title"
             ></Input>
           </Form.Item>
-          <Form.Item label="Channel" name="channel_id">
+
+          <Form.Item
+            label="Channel"
+            name="channel_id"
+            rules={[
+              {
+                required: true,
+                message: 'Channel can not be empty',
+              },
+            ]}
+          >
             <Channel width={400} />
           </Form.Item>
-          <Form.Item label="Cover"></Form.Item>
-          <Form.Item label="Content"></Form.Item>
+
+          <Form.Item label="Cover" name="type">
+            <Radio.Group onChange={changeType}>
+              <Radio value={1}>Single photo</Radio>
+              <Radio value={3}>Triple photos</Radio>
+              <Radio value={0}>No photos</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          <Form.Item wrapperCol={{ offset: 2 }}>
+            {uploadAmount !== 0 && (
+              <Upload
+                listType="picture-card"
+                fileList={fileList}
+                action={`${baseURL}upload`}
+                //指定上传名字
+                name="image"
+                //上传文件改变时的状态
+                onChange={uploadImage}
+                onPreview={handlePreview}
+              >
+                {fileList.length < uploadAmount && <PlusOutlined />}
+              </Upload>
+            )}
+          </Form.Item>
+
+          <Form.Item
+            label="Content"
+            name="content"
+            rules={[
+              {
+                required: true,
+                message: 'Content can not be empty',
+              },
+            ]}
+          >
+            <ReactQuill
+              theme="snow"
+              className="publish-quill"
+              placeholder="Write the content of article"
+            ></ReactQuill>
+          </Form.Item>
+
           <Form.Item wrapperCol={{ offset: 2 }}>
             <Space>
               <Button type="primary" htmlType="submit" size="large">
@@ -63,6 +160,21 @@ const Publish = () => {
           </Form.Item>
         </Form>
       </Card>
+      {/* Preview */}
+      <Modal
+        visible={showPreview}
+        title={'Preview'}
+        footer={null}
+        onCancel={handleCancel}
+      >
+        <img
+          alt="example"
+          style={{
+            width: '100%',
+          }}
+          src={previewUrl}
+        />
+      </Modal>
     </div>
   )
 }

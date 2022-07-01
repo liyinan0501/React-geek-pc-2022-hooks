@@ -3,7 +3,7 @@ import { message } from 'antd'
 import { removeToken, hasToken, getToken } from './token'
 import { history } from 'utils/history'
 
-export const baseURL = 'http://geek.itheima.net/v1_0'
+export const baseURL = 'http://geek.itheima.net/v1_0/'
 const request = axios.create({
   baseURL,
   timeout: 5000,
