@@ -26,3 +26,10 @@ export const getArticles = (params) => {
     })
   }
 }
+
+export const delArticle = (id, params) => {
+  return async (dispatch) => {
+    await request.delete(`/mp/articles/${id}`)
+    dispatch(getArticles(params))
+  }
+}

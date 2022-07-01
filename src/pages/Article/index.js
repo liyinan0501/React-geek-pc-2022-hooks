@@ -9,22 +9,26 @@ import {
   Space,
   Table,
   Tag,
+  Modal,
 } from 'antd'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   HomeOutlined,
   DiffOutlined,
   EditOutlined,
   DeleteOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons'
 import { ArticleStatus } from 'api/constant'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { getChannels, getArticles } from 'store/actions'
+import { getChannels, getArticles, delArticle } from 'store/actions'
 import img404 from 'assets/error.png'
+import { useRef } from 'react'
 
 const { Option } = Select
 const { RangePicker } = DatePicker
+const { confirm } = Modal
 
 const Article = () => {
   const dispatch = useDispatch()
@@ -89,14 +93,16 @@ const Article = () => {
               type="primary"
               shape="circle"
               icon={<EditOutlined />}
-              onClick={() => {}}
+              onClick={() => {
+                goPublish(id)
+              }}
             />
             <Button
               type="primary"
               shape="circle"
               icon={<DeleteOutlined />}
               danger
-              onClick={() => this.handleDelete(id)}
+              onClick={() => handleDelete(id)}
             />
           </Space>
         )
@@ -104,16 +110,58 @@ const Article = () => {
     },
   ]
 
-  const onFinish = (values) => {
-    console.log(values)
+  let filters = useRef({})
+  const onFinish = ({ status, channel_id, date }) => {
+    // console.log('Query:', status, channel_id, date)
+    const params = { channel_id, page: current, per_page: pageSize }
+    if (status !== -1) {
+      params.status = status
+    } else {
+      delete params.status
+    }
+    if (!!channel_id) {
+      params.channel_id = channel_id
+    } else {
+      delete params.channel_id
+    }
+    if (!!date) {
+      params.begin_pubdate = date[0]
+        .startOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      params.end_pubdate = date[1].endOf('day').format('YYYY-MM-DD HH:mm:ss')
+    } else {
+      delete params.begin_pubdate
+      delete params.end_pubdate
+    }
+    console.log(params)
+    filters.current = params
+    dispatch(getArticles(params))
   }
 
   const changePage = (current, pageSize) => {
-    const params = {
-      page: current,
-      per_page: pageSize,
-    }
+    const params = { ...filters.current, page: current, per_page: pageSize }
     dispatch(getArticles(params))
+  }
+
+  const handleDelete = (id) => {
+    confirm({
+      title: 'Do you Want to delete these items?',
+      icon: <ExclamationCircleOutlined />,
+      content: 'Some descriptions',
+
+      onOk() {
+        dispatch(delArticle(id, filters.current))
+      },
+
+      onCancel() {
+        console.log('Cancel')
+      },
+    })
+  }
+
+  const navigate = useNavigate()
+  const goPublish = (id) => {
+    navigate(`/home/publish?id=${id}`)
   }
 
   return (
