@@ -11,7 +11,12 @@ import {
   Tag,
 } from 'antd'
 import { Link } from 'react-router-dom'
-import { HomeOutlined, DiffOutlined } from '@ant-design/icons'
+import {
+  HomeOutlined,
+  DiffOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons'
 import { ArticleStatus } from 'api/constant'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -30,7 +35,7 @@ const Article = () => {
   }, [dispatch])
 
   const channels = useSelector((item) => item.channel)
-  const { page, pageSize, count, list } = useSelector((item) => item.article)
+  const { current, pageSize, total, list } = useSelector((item) => item.article)
 
   const columns = [
     {
@@ -76,11 +81,39 @@ const Article = () => {
     },
     {
       title: 'Action',
+      dataIndex: 'id',
+      render: (id) => {
+        return (
+          <Space>
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<EditOutlined />}
+              onClick={() => {}}
+            />
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<DeleteOutlined />}
+              danger
+              onClick={() => this.handleDelete(id)}
+            />
+          </Space>
+        )
+      },
     },
   ]
 
   const onFinish = (values) => {
     console.log(values)
+  }
+
+  const changePage = (current, pageSize) => {
+    const params = {
+      page: current,
+      per_page: pageSize,
+    }
+    dispatch(getArticles(params))
   }
 
   return (
@@ -135,8 +168,19 @@ const Article = () => {
           </Form.Item>
         </Form>
       </Card>
-      <Card title={`Total ${count} results`}>
-        <Table columns={columns} dataSource={list} rowKey="id" />
+      <Card title={`Total ${total} results`}>
+        <Table
+          columns={columns}
+          dataSource={list}
+          rowKey="id"
+          pagination={{
+            position: ['bottomCenter'],
+            total,
+            pageSize,
+            current,
+            onChange: changePage,
+          }}
+        />
       </Card>
     </div>
   )

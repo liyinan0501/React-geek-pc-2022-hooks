@@ -1,7 +1,7 @@
 const initialState = {
   list: [],
-  count: 0,
-  page: 1,
+  total: 0,
+  current: 1,
   pageSize: 10,
 }
 

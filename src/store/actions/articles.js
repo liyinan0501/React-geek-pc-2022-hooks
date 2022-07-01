@@ -4,10 +4,10 @@ export const getArticles = (params) => {
   return async (dispatch) => {
     const res = await request.get('/mp/articles', { params })
     const {
-      page,
+      page: current,
       per_page: pageSize,
       results: list,
-      total_count: count,
+      total_count: total,
     } = res.data
 
     dispatch({
@@ -19,8 +19,8 @@ export const getArticles = (params) => {
             cover: item.cover.images[0],
           }
         }),
-        count,
-        page,
+        total,
+        current,
         pageSize,
       },
     })
