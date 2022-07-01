@@ -12,65 +12,70 @@ import {
 } from 'antd'
 import { Link } from 'react-router-dom'
 import { HomeOutlined, DiffOutlined } from '@ant-design/icons'
+import { ArticleStatus } from 'api/constant'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { getChannels, getArticles } from 'store/actions'
+import img404 from 'assets/error.png'
+
 const { Option } = Select
 const { RangePicker } = DatePicker
 
 const Article = () => {
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(getChannels())
+    dispatch(getArticles({}))
+  }, [dispatch])
+
+  const channels = useSelector((item) => item.channel)
+  const { page, pageSize, count, list } = useSelector((item) => item.article)
+
   const columns = [
     {
       title: 'Cover',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'cover',
+      render: (cover) => {
+        return (
+          <img
+            src={cover || img404}
+            alt=""
+            style={{ width: 200, height: 120, objectFit: 'cover' }}
+          ></img>
+        )
+      },
     },
     {
       title: 'Title',
-      dataIndex: 'age',
-      key: 'age',
+      dataIndex: 'title',
     },
     {
       title: 'Status',
-      dataIndex: 'address',
-      key: 'address',
+      dataIndex: 'status',
+      render: (status) => {
+        const obj = ArticleStatus.find((item) => item.id === status)
+        return <Tag color={obj.color}>{obj.name}</Tag>
+      },
     },
     {
       title: 'Publish date',
-      key: 'tags',
-      dataIndex: 'tags',
+      dataIndex: 'pubdate',
     },
     {
       title: 'Views',
+      dataIndex: 'read_count',
     },
     {
       title: 'Comments',
+      dataIndex: 'comment_count',
     },
     {
       title: 'Likes',
+      dataIndex: 'like_count',
     },
     {
       title: 'Action',
-    },
-  ]
-  const data = [
-    {
-      key: '1',
-      name: 'John Brown',
-      age: 32,
-      address: 'New York No. 1 Lake Park',
-      tags: ['nice', 'developer'],
-    },
-    {
-      key: '2',
-      name: 'Jim Green',
-      age: 42,
-      address: 'London No. 1 Lake Park',
-      tags: ['loser'],
-    },
-    {
-      key: '3',
-      name: 'Joe Black',
-      age: 32,
-      address: 'Sidney No. 1 Lake Park',
-      tags: ['cool', 'teacher'],
     },
   ]
 
@@ -99,18 +104,19 @@ const Article = () => {
         <Form initialValues={{ status: -1 }} onFinish={onFinish}>
           <Form.Item label="Status" name="status" labelCol={{ span: 2 }}>
             <Radio.Group>
-              <Radio value={-1}>All</Radio>
-              <Radio value={0}>Draft</Radio>
-              <Radio value={1}>Pending</Radio>
-              <Radio value={2}>Proved</Radio>
-              <Radio value={3}>Failed</Radio>
+              {ArticleStatus.map((item) => (
+                <Radio key={item.id} value={item.id}>
+                  {item.name}
+                </Radio>
+              ))}
             </Radio.Group>
           </Form.Item>
 
           <Form.Item label="Channel" name="channel_id" labelCol={{ span: 2 }}>
             <Select placeholder="Select a channel" style={{ width: 120 }}>
-              <Option value="jack">Jack</Option>
-              <Option value="lucy">Lucy</Option>
+              {channels.map((item) => (
+                <Option key={item.id}>{item.name}</Option>
+              ))}
             </Select>
           </Form.Item>
 
@@ -129,8 +135,8 @@ const Article = () => {
           </Form.Item>
         </Form>
       </Card>
-      <Card>
-        <Table columns={columns} dataSource={data} />
+      <Card title={`Total ${count} results`}>
+        <Table columns={columns} dataSource={list} rowKey="id" />
       </Card>
     </div>
   )
