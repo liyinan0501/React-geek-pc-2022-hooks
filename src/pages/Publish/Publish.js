@@ -9,6 +9,7 @@ import {
   Radio,
   Upload,
   Modal,
+  message,
 } from 'antd'
 import { Link } from 'react-router-dom'
 import { HomeOutlined, DiffOutlined, PlusOutlined } from '@ant-design/icons'
@@ -17,10 +18,36 @@ import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import { useState } from 'react'
 import { baseURL } from 'utils/request'
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { addArticle } from 'store/actions'
 
 const Publish = () => {
-  const onFinish = (values) => {
-    console.log(values)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const onFinish = async (values) => {
+    if (values.type !== fileList.length) {
+      return message.warning('Upload amount is not correct')
+    }
+    const { type, ...rest } = values
+    const images = fileList.map((item) => {
+      return item.response.data.url || item.url
+    })
+    const data = {
+      ...rest,
+      cover: {
+        type,
+        images,
+      },
+    }
+    console.log(data)
+    try {
+      await dispatch(addArticle(data))
+      message.success('Publish succeeds!', 1, () => {
+        navigate(`/home/article`)
+      })
+    } catch {}
   }
 
   const [uploadAmount, setUploadAmount] = useState(1)
@@ -30,11 +57,7 @@ const Publish = () => {
     setFileList([])
   }
 
-  const [fileList, setFileList] = useState([
-    {
-      url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-    },
-  ])
+  const [fileList, setFileList] = useState([])
   // uploaded image will be saved in fileList
   const uploadImage = ({ fileList }) => {
     setFileList(fileList)
@@ -51,6 +74,18 @@ const Publish = () => {
   const handleCancel = () => {
     setShowPreview(false)
     setPreviewUrl('')
+  }
+
+  const beforeUpload = (file) => {
+    if (file.size >= 1024 * 500) {
+      message.warn('Can not upload over 500kb')
+      return Upload.LIST_IGNORE
+    }
+    if (!['image/png', 'image/jpeg'].includes(file.type)) {
+      message.warn('Only png and jpeg can upload')
+      return Upload.LIST_IGNORE
+    }
+    return true
   }
 
   return (
@@ -127,6 +162,7 @@ const Publish = () => {
                 //上传文件改变时的状态
                 onChange={uploadImage}
                 onPreview={handlePreview}
+                beforeUpload={beforeUpload}
               >
                 {fileList.length < uploadAmount && <PlusOutlined />}
               </Upload>

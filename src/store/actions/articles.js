@@ -33,3 +33,9 @@ export const delArticle = (id, params) => {
     dispatch(getArticles(params))
   }
 }
+
+export const addArticle = (data) => {
+  return async () => {
+    await request.post('/mp/articles?draft=false', data)
+  }
+}
