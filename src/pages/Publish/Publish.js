@@ -21,35 +21,9 @@ import { baseURL } from 'utils/request'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { addArticle } from 'store/actions'
+import React from 'react'
 
 const Publish = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-
-  const onFinish = async (values) => {
-    if (values.type !== fileList.length) {
-      return message.warning('Upload amount is not correct')
-    }
-    const { type, ...rest } = values
-    const images = fileList.map((item) => {
-      return item.response.data.url || item.url
-    })
-    const data = {
-      ...rest,
-      cover: {
-        type,
-        images,
-      },
-    }
-    console.log(data)
-    try {
-      await dispatch(addArticle(data))
-      message.success('Publish succeeds!', 1, () => {
-        navigate(`/home/article`)
-      })
-    } catch {}
-  }
-
   const [uploadAmount, setUploadAmount] = useState(1)
   const changeType = (e) => {
     const count = e.target.value
@@ -88,6 +62,47 @@ const Publish = () => {
     return true
   }
 
+  const save = async (values, draft) => {
+    if (values.type !== fileList.length) {
+      return message.warning('Upload amount is not correct')
+    }
+    const { type, ...rest } = values
+    const images = fileList.map((item) => {
+      return item.response.data.url || item.url
+    })
+    const data = {
+      ...rest,
+      cover: {
+        type,
+        images,
+      },
+    }
+    try {
+      await dispatch(addArticle(data, draft))
+      message.success(
+        draft ? 'Save draft succeeds' : 'Publish succeeds!',
+        1,
+        () => {
+          navigate(`/home/article`)
+        }
+      )
+    } catch {}
+  }
+
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const onFinish = async (values) => {
+    save(values, false)
+  }
+
+  //1. `getFieldsValue()` 仅获取表单数据，不进行表单校验
+  //2. `validateFields()` 先**进行表单校验，再获取表单数据【此处，使用该方法】
+  const formRef = React.createRef()
+  const addDraft = async () => {
+    const values = await formRef.current.validateFields()
+    save(values, true)
+  }
+
   return (
     <div className={styles.root}>
       <Card
@@ -107,6 +122,7 @@ const Publish = () => {
         }
       >
         <Form
+          ref={formRef}
           labelCol={{ span: 2 }}
           size="large"
           onFinish={onFinish}
@@ -191,7 +207,9 @@ const Publish = () => {
               <Button type="primary" htmlType="submit" size="large">
                 Publish
               </Button>
-              <Button size="large">Save</Button>
+              <Button size="large" onClick={addDraft}>
+                Draft
+              </Button>
             </Space>
           </Form.Item>
         </Form>

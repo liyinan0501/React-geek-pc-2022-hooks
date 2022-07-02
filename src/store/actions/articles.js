@@ -34,8 +34,8 @@ export const delArticle = (id, params) => {
   }
 }
 
-export const addArticle = (data) => {
+export const addArticle = (data, draft = false) => {
   return async () => {
-    await request.post('/mp/articles?draft=false', data)
+    await request.post(`/mp/articles?draft=${draft}`, data)
   }
 }
