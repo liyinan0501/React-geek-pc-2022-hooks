@@ -12,18 +12,28 @@ import {
   message,
 } from 'antd'
 import { Link } from 'react-router-dom'
-import { HomeOutlined, DiffOutlined, PlusOutlined } from '@ant-design/icons'
+import {
+  HomeOutlined,
+  DiffOutlined,
+  PlusOutlined,
+  EditOutlined,
+} from '@ant-design/icons'
 import Channel from 'components/Channel/index'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { baseURL } from 'utils/request'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import { addArticle } from 'store/actions'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { publishArticle } from 'store/actions'
 import React from 'react'
+import { getArticleById } from 'api/articles'
 
 const Publish = () => {
+  const [params] = useSearchParams()
+  const editId = params.get('id')
+  const isEdit = !!editId
+
   const [uploadAmount, setUploadAmount] = useState(1)
   const changeType = (e) => {
     const count = e.target.value
@@ -40,7 +50,7 @@ const Publish = () => {
   const [showPreview, setShowPreview] = useState(false)
   const [previewUrl, setPreviewUrl] = useState('')
   const handlePreview = (file) => {
-    const url = file.url || file.response.data.url
+    const url = file.response.data.url || file.url
     setShowPreview(true)
     setPreviewUrl(url)
   }
@@ -62,13 +72,13 @@ const Publish = () => {
     return true
   }
 
-  const save = async (values, draft) => {
+  const save = async (values, isDraft) => {
     if (values.type !== fileList.length) {
       return message.warning('Upload amount is not correct')
     }
     const { type, ...rest } = values
     const images = fileList.map((item) => {
-      return item.response.data.url || item.url
+      return item.url || item.response.data.url
     })
     const data = {
       ...rest,
@@ -77,16 +87,19 @@ const Publish = () => {
         images,
       },
     }
+    if (isEdit) {
+      data.id = editId
+    }
     try {
-      await dispatch(addArticle(data, draft))
+      await dispatch(publishArticle(data, isDraft, isEdit))
       message.success(
-        draft ? 'Save draft succeeds' : 'Publish succeeds!',
+        isDraft ? 'Save draft succeeds' : 'Publish succeeds!',
         1,
         () => {
           navigate(`/home/article`)
         }
       )
-    } catch {}
+    } catch (error) {}
   }
 
   const dispatch = useDispatch()
@@ -103,6 +116,28 @@ const Publish = () => {
     save(values, true)
   }
 
+  useEffect(() => {
+    if (!editId) return
+    ;(async () => {
+      try {
+        const res = await getArticleById(editId)
+        const values = {
+          ...res.data,
+          type: res.data.cover.type,
+        }
+        formRef.current.setFieldsValue(values)
+        const images = res.data.cover.images
+        const imgList = images.map((item) => {
+          return { url: item }
+        })
+        setFileList(imgList)
+        setUploadAmount(res.data.cover.type)
+      } catch (error) {
+        console.log(error)
+      }
+    })()
+  }, [editId])
+
   return (
     <div className={styles.root}>
       <Card
@@ -115,8 +150,9 @@ const Publish = () => {
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-              <DiffOutlined />
-              {` `}Publish
+              {editId ? <EditOutlined /> : <DiffOutlined />}
+              {` `}
+              {editId ? 'Edit' : 'Publish'}
             </Breadcrumb.Item>
           </Breadcrumb>
         }

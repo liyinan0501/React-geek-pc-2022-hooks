@@ -34,8 +34,26 @@ export const delArticle = (id, params) => {
   }
 }
 
-export const addArticle = (data, draft = false) => {
+// export const addArticle = (data, draft = false) => {
+//   return async () => {
+//     await request.post(`/mp/articles?draft=${draft}`, data)
+//   }
+// }
+
+// export const editArticle = (data, draft) => {
+//   return async () => {
+//     await request.put(`/mp/articles/${data.id}?draft=${draft}`, data)
+//   }
+// }
+
+export function publishArticle(data, isDraft, isEdit) {
   return async () => {
-    await request.post(`/mp/articles?draft=${draft}`, data)
+    if (!isEdit) {
+      //  发布
+      await request.post(`/mp/articles?draft=${isDraft}`, data)
+    } else {
+      // 修改
+      await request.put(`/mp/articles/${data.id}?draft=${isDraft}`, data)
+    }
   }
 }
