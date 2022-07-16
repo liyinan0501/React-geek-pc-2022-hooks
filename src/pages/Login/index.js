@@ -4,19 +4,25 @@ import './index.scss'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { login } from 'store/actions/login'
+import React, { useState } from 'react'
 
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const [loadings, setLoadings] = useState(false)
 
   const onFinish = async (values) => {
     const { mobile, code } = values
+    setLoadings(true)
     try {
       await dispatch(login(mobile, code))
-      message.success('Login succeeds!', 1)
-      navigate('/home', { replace: true })
+      message.success('Login succeeds!', 1, () => {
+        navigate('/home', { replace: true })
+      })
     } catch (e) {
-      message.error(e.response?.data?.message || '登录失败')
+      message.error(e.response?.data?.message || '登录失败', 1, () => {
+        setLoadings(false)
+      })
     }
   }
   return (
@@ -83,7 +89,13 @@ const Login = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" size="large" block>
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              block
+              loading={loadings}
+            >
               Submit
             </Button>
           </Form.Item>
