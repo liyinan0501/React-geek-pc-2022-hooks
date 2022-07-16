@@ -29,7 +29,7 @@ const Login = () => {
           initialValues={{
             mobile: '13911111111',
             code: '246810',
-            remember: true,
+            agree: true,
           }}
         >
           <Form.Item
@@ -65,7 +65,18 @@ const Login = () => {
             <Input size="large" placeholder="Identifying code" maxLength={6} />
           </Form.Item>
 
-          <Form.Item name="remember" valuePropName="checked">
+          <Form.Item
+            name="agree"
+            valuePropName="checked"
+            rules={[
+              {
+                validator: (rule, value) =>
+                  value
+                    ? Promise.resolve()
+                    : Promise.reject(new Error('Agree terms and conditions')),
+              },
+            ]}
+          >
             <Checkbox className="login-checkbox-label">
               Agree terms and conditions
             </Checkbox>
