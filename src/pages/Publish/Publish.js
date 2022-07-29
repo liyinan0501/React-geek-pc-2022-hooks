@@ -132,8 +132,8 @@ const Publish = () => {
         })
         setFileList(imgList)
         setUploadAmount(res.data.cover.type)
-      } catch (error) {
-        console.log(error)
+      } catch (e) {
+        message.error(e.response?.data?.message || '发布失败', 1)
       }
     })()
   }, [editId])
